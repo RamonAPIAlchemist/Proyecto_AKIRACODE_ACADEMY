@@ -1,0 +1,796 @@
+{% extends 'baseadmin.html' %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block body %}
+<!--MENSAJE DE ALERTA SweetAlert2-->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+    {% for category, message in messages %}
+    <script type="text/javascript">
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        Toast.fire({
+            icon: "{{ 'success' if category == 'success' else 'error' }}",
+            title: "{{message}}"
+        });
+    </script>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<!-- PERFIL DEL USUARIO ADMINISTRADOR -->
+<div class="container p-5 mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Card Principal del Perfil -->
+            <div class="card shadow-lg border-0 mb-5">
+                <!-- Header de la Card -->
+                <div class="card-header text-center py-4"
+                    style="background: linear-gradient(220deg, #ffffff,#7a9f7a,#355e3b);">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 position-relative">
+                            <!-- Imagen de perfil editable -->
+                            <div class="position-relative d-inline-block">
+                                <img id="fotoPerfil"
+                                    src="{{ url_for('static', filename=session.get('foto_perfil', 'img/user.png')) }}"
+                                    class="img-fluid rounded-circle shadow" alt="Foto de perfil"
+                                    style="width: 120px; height: 120px; object-fit: cover; border: 4px solid white;"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Tu foto de perfil actual">
+                                <!-- Botón para cambiar foto -->
+                                <button type="button"
+                                    class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle"
+                                    data-bs-toggle="modal" data-bs-target="#modalCambiarFoto"
+                                    style="width: 35px; height: 35px; padding: 0;"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Cambiar foto de perfil">
+                                    <i class="bi bi-camera"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <h2 class="text-white mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del usuario">{{ session.get('nombre', 'Usuario') }}</h2>
+                            <p class="text-light mb-0">
+                                {% if session.get('rol') == 1 %}
+                                <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Permisos de administrador">Administrador</span>
+                                {% else %}
+                                <span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Permisos de usuario estándar">Usuario</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body de la Card -->
+                <div class="card-body p-5">
+                    <!-- Información del Usuario -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-success mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Información personal del usuario">
+                                <i class="bi bi-person-circle"></i> Información Personal
+                            </h5>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nombre Completo:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre completo del usuario">{{ session.get('nombre', 'No disponible') }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID de Usuario:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Identificador único del usuario">{{ session.get('id', 'No disponible') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="text-success mb-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Información de la cuenta">
+                                <i class="bi bi-shield-lock"></i> Información de Cuenta
+                            </h5>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Rol:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Nivel de permisos del usuario">
+                                    {% if session.get('rol') == 1 %}
+                                    Administrador
+                                    {% elif session.get('rol') == 2 %}
+                                    Usuario
+                                    {% else %}
+                                    No definido
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Email:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Correo electrónico del usuario">{{ session.get('email', 'No disponible') }}</p>
+                            </div>
+                            <!-- NUEVOS CAMPOS DE FECHA -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Fecha de Creación:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha en que se creó la cuenta">
+                                    {{ session.get('fecha_creacion', 'No disponible') }}
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Último Acceso:</label>
+                                <p class="form-control bg-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Última vez que inició sesión">
+                                    {{ session.get('ultimo_acceso', 'No disponible') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button class="btn btn-warning me-md-2" data-bs-toggle="modal"
+                                    data-bs-target="#modalEditarPerfil"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Editar información personal">
+                                    <i class="bi bi-pencil-square"></i> Editar Perfil
+                                </button>
+                                <button class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#modalCambiarPassword"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Cambiar contraseña de acceso">
+                                    <i class="bi bi-key"></i> Cambiar Contraseña
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GESTIÓN DE USUARIOS (Solo visible para administradores) -->
+{% if session.get('rol') == 1 %}
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            
+            <!-- AGREGAR NUEVO USUARIO (REPLEGABLE) -->
+            <div class="card mb-4 shadow-lg" style="border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+                <div class="card-header text-white d-flex justify-content-between align-items-center" 
+                     style="background: linear-gradient(to right, #28a745, #ffffff); box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1); border-radius: 10px;">
+                    <h5 class="mb-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Gestión de usuarios del sistema">Gestión de Usuarios</h5>
+                    <button class="btn btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#agregarUsuarioCollapse" 
+                            aria-expanded="true" aria-controls="agregarUsuarioCollapse"
+                            style="border: 2px solid #28a745; color: #28a745; background: transparent;"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar/ocultar formulario para agregar usuario">
+                        Agregar Usuario
+                    </button>
+                </div>
+                <div class="collapse show" id="agregarUsuarioCollapse">
+                    <div class="card-body">
+                        <form method="POST" id="addUserForm">
+                            <input type="hidden" name="agregar_usuario" value="1">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" name="nombre" class="form-control shadow-sm" 
+                                           style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" required
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese el nombre completo del usuario">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Correo</label>
+                                    <input type="email" name="email" class="form-control shadow-sm" 
+                                           style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" required
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese un correo electrónico válido">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Contraseña</label>
+                                    <input type="text" name="password" class="form-control shadow-sm" 
+                                           style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" required
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Establezca una contraseña para el usuario">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Rol</label>
+                                    <select name="id_rol" class="form-control shadow-sm" style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccione el tipo de usuario">
+                                        <option value="2">Usuario</option>
+                                        <option value="1">Administrador</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success shadow-sm" 
+                                    style="box-shadow: 0 4px 10px rgba(0,0,0,0.2);"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar nuevo usuario al sistema">
+                                Agregar Usuario
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENCABEZADO DE LISTA DE USUARIOS -->
+            <div class="mb-3">
+                <div class="text-center" style="padding: 20px;">
+                    <h4 class="mb-0" style="font-size: 1.8rem; font-weight: 600; color: black;"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Lista completa de usuarios registrados">
+                        Lista de Usuarios
+                    </h4>
+                    <p class="text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Información detallada de todos los usuarios">
+                        Total de usuarios: {{ usuarios|length }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- LISTA DE USUARIOS -->
+            <div class="card mb-4 shadow-lg" style="border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover shadow-sm" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 8px;">
+                            <thead>
+                                <tr>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Número de orden">N°</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del usuario">Nombre</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Correo electrónico">Correo</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Contraseña del usuario">Contraseña</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Tipo de usuario">Rol</th>
+                                    <!-- NUEVAS COLUMNAS DE FECHA -->
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de creación de la cuenta">Fecha Creación</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Último acceso al sistema">Último Acceso</th>
+                                    <th class="text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Opciones disponibles">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in usuarios %}
+                                <tr>
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Usuario número {{ loop.index }}">{{ loop.index }}</td>
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre: {{ u.nombre }}">
+                                        <div class="d-flex align-items-center">
+                                            {% if u.foto_perfil %}
+                                            <img src="{{ url_for('static', filename=u.foto_perfil) }}" 
+                                                 class="rounded-circle me-2" 
+                                                 style="width: 30px; height: 30px; object-fit: cover;"
+                                                 data-bs-toggle="tooltip" data-bs-placement="top" title="Foto de perfil">
+                                            {% else %}
+                                            <img src="{{ url_for('static', filename='img/user.png') }}" 
+                                                 class="rounded-circle me-2" 
+                                                 style="width: 30px; height: 30px; object-fit: cover;"
+                                                 data-bs-toggle="tooltip" data-bs-placement="top" title="Foto de perfil predeterminada">
+                                            {% endif %}
+                                            {{ u.nombre }}
+                                        </div>
+                                    </td>
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Email: {{ u.email }}">{{ u.email }}</td>
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Contraseña: {{ u.password }}">
+                                        <span class="text-muted">•••••••</span>
+                                    </td>
+                                    <td>
+                                        {% if u.id_rol == 1 %}
+                                        <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Usuario administrador">Admin</span>
+                                        {% else %}
+                                        <span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Usuario estándar">Usuario</span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- NUEVAS CELDAS DE FECHA -->
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Cuenta creada el: {{ u.fecha_creacion_formateada }}">
+                                        <small class="text-muted">{{ u.fecha_creacion_formateada or 'N/A' }}</small>
+                                    </td>
+                                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="Último acceso: {{ u.ultimo_acceso_formateada }}">
+                                        <small class="text-muted">{{ u.ultimo_acceso_formateada or 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-success shadow-sm" data-bs-toggle="collapse" data-bs-target="#editar{{ u.id }}" 
+                                                    style="box-shadow: 0 4px 8px rgba(0,0,0,0.15);"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Editar información del usuario">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </button>
+                                            <a href="{{ url_for('listar') }}?eliminar_usuario={{ u.id }}" class="btn btn-sm btn-danger shadow-sm delete-user" 
+                                               style="box-shadow: 0 4px 8px rgba(0,0,0,0.15);"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar usuario del sistema">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- FORMULARIO DE EDICIÓN (COLLAPSE) -->
+                                <tr class="collapse" id="editar{{ u.id }}">
+                                    <td colspan="9">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">
+                                                    <i class="bi bi-pencil-square"></i> Editando usuario: {{ u.nombre }}
+                                                </h6>
+                                                <form method="POST" class="update-user-form">
+                                                    <input type="hidden" name="id" value="{{ u.id }}">
+                                                    <input type="hidden" name="editar_usuario" value="1">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-2">
+                                                            <label class="form-label small fw-bold">Nombre</label>
+                                                            <input type="text" name="nombre" class="form-control form-control-sm shadow-sm" 
+                                                                   style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" value="{{ u.nombre }}" required
+                                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Editar nombre del usuario">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label class="form-label small fw-bold">Correo</label>
+                                                            <input type="email" name="email" class="form-control form-control-sm shadow-sm" 
+                                                                   style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" value="{{ u.email }}" required
+                                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Editar correo electrónico">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label class="form-label small fw-bold">Contraseña</label>
+                                                            <input type="text" name="password" class="form-control form-control-sm shadow-sm" 
+                                                                   style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" value="{{ u.password }}" required
+                                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Editar contraseña del usuario">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <label class="form-label small fw-bold">Rol</label>
+                                                            <select name="id_rol" class="form-control form-control-sm shadow-sm" style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar tipo de usuario">
+                                                                <option value="1" {% if u.id_rol == 1 %}selected{% endif %}>Administrador</option>
+                                                                <option value="2" {% if u.id_rol == 2 %}selected{% endif %}>Usuario</option>
+                                                            </select>
+                                                        </div>
+                                                        <!-- NUEVO CAMPO PARA EDITAR ÚLTIMO ACCESO -->
+                                                        <div class="col-md-2">
+                                                            <label class="form-label small fw-bold">Último Acceso</label>
+                                                            <input type="datetime-local" name="ultimo_acceso" class="form-control form-control-sm shadow-sm" 
+                                                                   style="box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);" 
+                                                                   value="{{ u.ultimo_acceso.strftime('%Y-%m-%dT%H:%M') if u.ultimo_acceso else '' }}"
+                                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Editar fecha y hora del último acceso">
+                                                        </div>
+                                                        <div class="col-md-2 d-flex align-items-end">
+                                                            <button type="submit" class="btn btn-primary btn-sm shadow-sm w-100 update-user-btn" 
+                                                                    style="box-shadow: 0 4px 10px rgba(0,0,0,0.2);"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Guardar cambios del usuario">
+                                                                <i class="bi bi-check-lg"></i> Actualizar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- PIE DE TABLA CON ESTADÍSTICAS -->
+                    <div class="card-footer bg-transparent">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <span class="badge bg-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Total de usuarios en el sistema">
+                                    Total: {{ usuarios|length }}
+                                </span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Usuarios administradores">
+                                    Admins: {{ usuarios|selectattr('id_rol', 'equalto', 1)|list|length }}
+                                </span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Usuarios estándar">
+                                    Usuarios: {{ usuarios|selectattr('id_rol', 'equalto', 2)|list|length }}
+                                </span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Usuarios activos recientemente">
+                                    Activos: {{ usuarios|selectattr('ultimo_acceso_formateada')|list|length }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODALES PARA EL PERFIL -->
+<!-- Modal Cambiar Foto de Perfil -->
+<div class="modal fade" id="modalCambiarFoto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(220deg, #ffffff,#7a9f7a,#355e3b);">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-camera"></i> Cambiar Foto de Perfil
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar ventana"></button>
+            </div>
+            <form action="{{ url_for('cambiar_foto_perfil') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body text-center">
+                    <!-- Vista previa de la imagen -->
+                    <div class="mb-3">
+                        <img id="vistaPrevia"
+                            src="{{ url_for('static', filename=session.get('foto_perfil', 'img/user.png')) }}"
+                            class="img-fluid rounded-circle shadow mb-3" alt="Vista previa"
+                            style="width: 150px; height: 150px; object-fit: cover;"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Vista previa de la nueva foto">
+                    </div>
+
+                    <!-- Selección de archivo -->
+                    <div class="mb-3">
+                        <label for="foto" class="form-label fw-bold">Seleccionar nueva imagen:</label>
+                        <input type="file" class="form-control" id="foto" name="foto" accept="image/*"
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccione una imagen desde su dispositivo">
+                        <div class="form-text">
+                            Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 2MB
+                        </div>
+                    </div>
+
+                    <!-- Opciones de imagen predefinidas -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">O selecciona una imagen predefinida:</label>
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <input type="radio" class="btn-check" name="foto_predefinida" value="img/user.png"
+                                    id="foto1" autocomplete="off">
+                                <label class="btn btn-outline-success w-100" for="foto1"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar avatar predeterminado 1">
+                                    <img src="{{ url_for('static', filename='img/user.png') }}"
+                                        class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                </label>
+                            </div>
+                            <div class="col-3">
+                                <input type="radio" class="btn-check" name="foto_predefinida" value="img/user2.png"
+                                    id="foto2" autocomplete="off">
+                                <label class="btn btn-outline-success w-100" for="foto2"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar avatar predeterminado 2">
+                                    <img src="{{ url_for('static', filename='img/user2.png') }}"
+                                        class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                </label>
+                            </div>
+                            <div class="col-3">
+                                <input type="radio" class="btn-check" name="foto_predefinida" value="img/user3.png"
+                                    id="foto3" autocomplete="off">
+                                <label class="btn btn-outline-success w-100" for="foto3"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar avatar predeterminado 3">
+                                    <img src="{{ url_for('static', filename='img/user3.png') }}"
+                                        class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                </label>
+                            </div>
+                            <div class="col-3">
+                                <input type="radio" class="btn-check" name="foto_predefinida" value="img/user4.png"
+                                    id="foto4" autocomplete="off">
+                                <label class="btn btn-outline-success w-100" for="foto4"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar avatar predeterminado 4">
+                                    <img src="{{ url_for('static', filename='img/user4.png') }}"
+                                        class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar y cerrar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Aplicar cambios de foto">Cambiar Foto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div class="modal fade" id="modalEditarPerfil" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(220deg, #ffffff,#7a9f7a,#355e3b);">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-pencil-square"></i> Editar Perfil
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar ventana"></button>
+            </div>
+            <form action="{{ url_for('actualizar_perfil') }}" method="POST">
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" name="nombre"
+                            value="{{ session.get('nombre', '') }}" required
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese su nombre completo">
+                        <label>Nombre Completo</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" name="email" value="{{ session.get('email', '') }}"
+                            required data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese su correo electrónico">
+                        <label>Correo Electrónico</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar y cerrar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Guardar cambios del perfil">Actualizar Perfil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarPassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(220deg, #ffffff,#7a9f7a,#355e3b);">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-key"></i> Cambiar Contraseña
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Cerrar ventana"></button>
+            </div>
+            <form action="{{ url_for('cambiar_password') }}" method="POST">
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" name="password_actual"
+                            placeholder="Contraseña actual" required
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese su contraseña actual">
+                        <label>Contraseña Actual</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" name="nueva_password" placeholder="Nueva contraseña"
+                            required data-bs-toggle="tooltip" data-bs-placement="top" title="Ingrese su nueva contraseña">
+                        <label>Nueva Contraseña</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" name="confirmar_password"
+                            placeholder="Confirmar contraseña" required
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Confirme su nueva contraseña">
+                        <label>Confirmar Nueva Contraseña</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar y cerrar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Aplicar cambio de contraseña">Cambiar Contraseña</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar tooltips de Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        const inputFoto = document.getElementById('foto');
+        const vistaPrevia = document.getElementById('vistaPrevia');
+
+        // Vista previa cuando se selecciona un archivo
+        if (inputFoto) {
+            inputFoto.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        vistaPrevia.src = e.target.result;
+                        // Deseleccionar fotos predefinidas
+                        document.querySelectorAll('input[name="foto_predefinida"]').forEach(radio => {
+                            radio.checked = false;
+                        });
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Cambiar vista previa cuando se selecciona foto predefinida
+        document.querySelectorAll('input[name="foto_predefinida"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    vistaPrevia.src = "{{ url_for('static', filename='') }}" + this.value;
+                    if (inputFoto) inputFoto.value = ''; // Limpiar input file
+                }
+            });
+        });
+
+        // SweetAlert2 para eliminar usuarios
+        const deleteButtons = document.querySelectorAll('.delete-user');
+        deleteButtons.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.href;
+
+                Swal.fire({
+                    title: '¿Deseas eliminar este usuario?',
+                    text: "Esta acción no se puede deshacer",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+
+        // SweetAlert2 para actualizar usuarios
+        const updateForms = document.querySelectorAll('.update-user-form');
+        updateForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: '¿Deseas actualizar este usuario?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, actualizar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // SweetAlert2 para agregar usuarios
+        const addUserForm = document.querySelector('#addUserForm');
+        if(addUserForm) {
+            addUserForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: '¿Deseas agregar este usuario?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, agregar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if(result.isConfirmed){
+                        addUserForm.submit();
+                    }
+                });
+            });
+        }
+
+        // Auto-cerrar formularios de edición después de actualizar
+        const updateButtons = document.querySelectorAll('.update-user-btn');
+        updateButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const form = this.closest('form');
+                const collapseId = form.closest('.collapse').id;
+                setTimeout(() => {
+                    const collapseElement = document.getElementById(collapseId);
+                    if (collapseElement) {
+                        const bsCollapse = new bootstrap.Collapse(collapseElement, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                }, 1000);
+            });
+        });
+
+        // Formatear automáticamente el campo de fecha y hora
+        const fechaInputs = document.querySelectorAll('input[type="datetime-local"]');
+        fechaInputs.forEach(input => {
+            // Si el campo está vacío, establecer la fecha y hora actual
+            if (!input.value) {
+                const now = new Date();
+                // Ajustar a formato YYYY-MM-DDTHH:MM
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                
+                input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        });
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-bottom: none;
+    }
+
+    .btn-check:checked+.btn-outline-success {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+    }
+
+    .position-relative .btn {
+        transform: translate(25%, 25%);
+    }
+
+    .form-control[readonly] {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    thead th {
+        background-color: black !important;
+        color: white !important;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        cursor: help;
+    }
+
+    /* Estilos para tooltips personalizados */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+    .tooltip-inner {
+        background-color: #333;
+        color: white;
+        border-radius: 4px;
+        padding: 8px 12px;
+        max-width: 300px;
+    }
+    [data-bs-toggle="tooltip"] {
+        cursor: help;
+    }
+    .table td[data-bs-toggle="tooltip"] {
+        cursor: help;
+    }
+
+    /* Mejoras para la tabla responsive */
+    .table-responsive {
+        border-radius: 8px;
+    }
+
+    /* Estilos para las fechas */
+    .text-muted {
+        font-size: 0.875rem;
+    }
+
+    /* Badges de estadísticas */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.75em;
+    }
+
+    /* Hover effects para las filas de la tabla */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.025);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    /* Estilos para los formularios de edición en collapse */
+    .collapse .card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    /* Estilos para campos de fecha y hora */
+    input[type="datetime-local"] {
+        cursor: pointer;
+    }
+
+    input[type="datetime-local"]:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+
+    /* Ajustes responsivos para formularios de edición */
+    @media (max-width: 768px) {
+        .row.g-3 > div {
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock %}

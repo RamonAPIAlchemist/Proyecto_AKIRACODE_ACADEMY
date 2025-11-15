@@ -1,0 +1,574 @@
+{% extends 'baseadmin.html' %}
+{% block title %}Lista de Productos{% endblock %}
+{% block body %}
+
+<div class="container-fluid p-4" style="background-color:#eefaf5; min-height:100vh;">
+
+    <!-- Letrero con sombra -->
+    <h2 class="text-center alert-productos mb-4">Lista de Cursos</h2>
+
+    <!-- Controles superiores -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button class="btn btn-light border me-2 shadow-sm" id="btnCopiar">
+                <i class="fas fa-copy"></i> Copiar
+            </button>
+            <button class="btn btn-light border me-2 shadow-sm" id="btnExcel">
+                <i class="fas fa-file-excel"></i> Excel
+            </button>
+            <button class="btn btn-light border me-2 shadow-sm" id="btnPDF">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-light border shadow-sm" id="btnImprimir">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="me-2">Mostrar</span>
+            <select id="registrosSelect" class="form-select form-select-sm me-2 shadow-sm" style="width:80px;">
+                <option>5</option>
+                <option selected>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option value="-1">Todos</option>
+            </select>
+            <span class="me-3">registros</span>
+            <label for="searchInput" class="me-2">Buscar:</label>
+            <input type="text" id="searchInput" class="form-control form-control-sm shadow-sm"
+                style="width:200px;" placeholder="Buscar...">
+        </div>
+    </div>
+
+    <!-- Tabla de productos con sombra -->
+    <div class="table-responsive shadow p-2 bg-white rounded">
+        <table class="table table-striped table-bordered table-hover" id="productosTable">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr id="row-{{ producto.id }}">
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>
+                        <input type="text" name="nombre" value="{{ producto.nombre }}" 
+                               class="form-control form-control-sm" data-id="{{ producto.id }}">
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" 
+                               class="form-control form-control-sm text-end" data-id="{{ producto.id }}">
+                    </td>
+                    <td>
+                        <input type="text" name="descripcion" value="{{ producto.descripcion }}" 
+                               class="form-control form-control-sm" data-id="{{ producto.id }}">
+                    </td>
+                    <td>
+                        <input type="date" name="fecha" value="{{ producto.fecha.strftime('%Y-%m-%d') if producto.fecha else '' }}" 
+                               class="form-control form-control-sm" data-id="{{ producto.id }}">
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-success btn-sm me-1 shadow-sm btn-guardar" 
+                                data-id="{{ producto.id }}">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm btn-eliminar" 
+                                data-id="{{ producto.id }}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <div id="infoPagina">Mostrando 1 a 10 de {{ productos|length }} registros</div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+        </nav>
+    </div>
+
+</div>
+
+<!-- Estilos -->
+<style>
+    body {
+        background-color: #eefaf5;
+    }
+
+    .alert-productos {
+        background-color: #f8d7da;
+        color: #721c24;
+        font-weight: bold;
+        font-size: 1.4rem;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        padding: 15px;
+    }
+
+    .table th,
+    .table td {
+        vertical-align: middle !important;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn-light i {
+        font-size: 1.1rem;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .shadow {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .btn-light:hover {
+        background-color: #e9ecef;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .page-link {
+        color: #28a745;
+    }
+
+    .page-link:hover {
+        color: #1e7e34;
+    }
+</style>
+
+<!-- Scripts -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const registrosSelect = document.getElementById('registrosSelect');
+        const tableBody = document.querySelector('#productosTable tbody');
+        let allRows = Array.from(tableBody.querySelectorAll('tr'));
+        const pagination = document.getElementById('pagination');
+        const infoPagina = document.getElementById('infoPagina');
+        let currentPage = 1;
+
+        // ===== FILTRAR Y PAGINAR =====
+        function filtrarYPaginar() {
+            const filter = searchInput.value.toLowerCase();
+            let rowsPerPage = parseInt(registrosSelect.value);
+            
+            if (rowsPerPage === -1) {
+                rowsPerPage = allRows.length;
+            }
+
+            let filteredRows = allRows.filter(row => {
+                const inputs = row.querySelectorAll('input');
+                let rowText = '';
+                
+                inputs.forEach(input => {
+                    rowText += input.value.toLowerCase() + ' ';
+                });
+                
+                const id = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+                rowText += id;
+                
+                return rowText.includes(filter);
+            });
+
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+            if (currentPage > pageCount) currentPage = 1;
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            allRows.forEach(row => row.style.display = 'none');
+            filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+            const showingStart = filteredRows.length === 0 ? 0 : start + 1;
+            const showingEnd = Math.min(end, filteredRows.length);
+            infoPagina.textContent = `Mostrando ${showingStart} a ${showingEnd} de ${filteredRows.length} registros`;
+
+            // Paginación
+            pagination.innerHTML = '';
+            
+            // Botón anterior
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#">«</a>`;
+            prevLi.addEventListener('click', (e) => { 
+                e.preventDefault();
+                if (currentPage > 1) { 
+                    currentPage--; 
+                    filtrarYPaginar(); 
+                } 
+            });
+            pagination.appendChild(prevLi);
+
+            // Números de página
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', (e) => { 
+                    e.preventDefault();
+                    currentPage = i; 
+                    filtrarYPaginar(); 
+                });
+                pagination.appendChild(li);
+            }
+
+            // Botón siguiente
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#">»</a>`;
+            nextLi.addEventListener('click', (e) => { 
+                e.preventDefault();
+                if (currentPage < pageCount) { 
+                    currentPage++; 
+                    filtrarYPaginar(); 
+                } 
+            });
+            pagination.appendChild(nextLi);
+        }
+
+        searchInput.addEventListener('keyup', () => { currentPage = 1; filtrarYPaginar(); });
+        registrosSelect.addEventListener('change', () => { currentPage = 1; filtrarYPaginar(); });
+        filtrarYPaginar();
+
+        // ===== BOTONES DE EXPORTACIÓN =====
+
+        // 1. COPIAR TABLA
+        document.getElementById('btnCopiar').addEventListener('click', () => {
+            let text = 'ID\tNombre\tPrecio\tDescripción\tFecha\n';
+            
+            allRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cells = row.cells;
+                    const id = cells[0].textContent;
+                    const nombre = cells[1].querySelector('input').value;
+                    const precio = cells[2].querySelector('input').value;
+                    const descripcion = cells[3].querySelector('input').value;
+                    const fecha = cells[4].querySelector('input').value;
+                    
+                    text += `${id}\t${nombre}\t${precio}\t${descripcion}\t${fecha}\n`;
+                }
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({
+                    title: '¡Copiado!',
+                    text: 'Tabla copiada al portapapeles',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }).catch(err => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo copiar la tabla',
+                    icon: 'error',
+                    timer: 1500
+                });
+            });
+        });
+
+        // 2. EXPORTAR A EXCEL
+        document.getElementById('btnExcel').addEventListener('click', () => {
+            const ws_data = [['ID', 'Nombre', 'Precio', 'Descripción', 'Fecha']];
+            
+            allRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cells = row.cells;
+                    const id = cells[0].textContent;
+                    const nombre = cells[1].querySelector('input').value;
+                    const precio = cells[2].querySelector('input').value;
+                    const descripcion = cells[3].querySelector('input').value;
+                    const fecha = cells[4].querySelector('input').value;
+                    
+                    ws_data.push([id, nombre, precio, descripcion, fecha]);
+                }
+            });
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, 'Cursos');
+            XLSX.writeFile(wb, 'cursos.xlsx');
+            
+            Swal.fire({
+                title: '¡Exportado!',
+                text: 'Archivo Excel generado correctamente',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
+
+        // 3. EXPORTAR A PDF (Versión simple)
+        document.getElementById('btnPDF').addEventListener('click', () => {
+            const printWindow = window.open('', '_blank');
+            let htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Lista de Cursos - PDF</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        h1 { color: #333; text-align: center; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Lista de Cursos</h1>
+                        <p>Generado el: ${new Date().toLocaleString()}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Descripción</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            allRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cells = row.cells;
+                    const id = cells[0].textContent;
+                    const nombre = cells[1].querySelector('input').value;
+                    const precio = cells[2].querySelector('input').value;
+                    const descripcion = cells[3].querySelector('input').value;
+                    const fecha = cells[4].querySelector('input').value;
+                    
+                    htmlContent += `
+                        <tr>
+                            <td>${id}</td>
+                            <td>${nombre}</td>
+                            <td>${precio}</td>
+                            <td>${descripcion}</td>
+                            <td>${fecha}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            printWindow.print();
+        });
+
+        // 4. IMPRIMIR
+        document.getElementById('btnImprimir').addEventListener('click', () => {
+            const printWindow = window.open('', '_blank');
+            let htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Lista de Cursos - Impresión</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        h1 { color: #333; text-align: center; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        @media print {
+                            body { margin: 0; }
+                            .header { margin-bottom: 10px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Lista de Cursos</h1>
+                        <p>Impreso el: ${new Date().toLocaleString()}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Descripción</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            allRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cells = row.cells;
+                    const id = cells[0].textContent;
+                    const nombre = cells[1].querySelector('input').value;
+                    const precio = cells[2].querySelector('input').value;
+                    const descripcion = cells[3].querySelector('input').value;
+                    const fecha = cells[4].querySelector('input').value;
+                    
+                    htmlContent += `
+                        <tr>
+                            <td>${id}</td>
+                            <td>${nombre}</td>
+                            <td>${precio}</td>
+                            <td>${descripcion}</td>
+                            <td>${fecha}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+        });
+
+        // ===== FUNCIONES PARA GUARDAR Y ELIMINAR =====
+        
+        // Guardar cambios
+        document.querySelectorAll('.btn-guardar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const row = document.getElementById(`row-${productId}`);
+                
+                const nombre = row.querySelector('input[name="nombre"]').value;
+                const precio = row.querySelector('input[name="precio"]').value;
+                const descripcion = row.querySelector('input[name="descripcion"]').value;
+                const fecha = row.querySelector('input[name="fecha"]').value;
+
+                Swal.fire({
+                    title: '¿Guardar cambios?',
+                    text: "¿Estás seguro de que deseas guardar los cambios?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, guardar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Crear form dinámico para enviar los datos
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/editar_producto/${productId}`;
+                        
+                        const fields = [
+                            { name: 'nombre', value: nombre },
+                            { name: 'precio', value: precio },
+                            { name: 'descripcion', value: descripcion },
+                            { name: 'fecha', value: fecha },
+                            { name: 'accion', value: 'guardar' }
+                        ];
+                        
+                        fields.forEach(field => {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = field.name;
+                            input.value = field.value;
+                            form.appendChild(input);
+                        });
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Eliminar producto
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "¡Esta acción no se puede deshacer!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Crear form dinámico para eliminar
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/editar_producto/${productId}`;
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'accion';
+                        input.value = 'eliminar';
+                        form.appendChild(input);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Auto-guardado con Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const productId = e.target.getAttribute('data-id');
+                const btnGuardar = document.querySelector(`.btn-guardar[data-id="${productId}"]`);
+                if (btnGuardar) {
+                    btnGuardar.click();
+                }
+            }
+        });
+
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Acerca de{% endblock %}
+
+{% block contenido %}
+
+<!-- Encabezado con imagen -->
+<div class="container mt-5">
+  <div class="text-center">
+    <img src="{{ url_for('static', filename='akiracode_banner.jpg') }}" 
+         class="img-fluid rounded shadow-sm mb-4" 
+         alt="AkiraCode Academy - Tu camino ninja en la programación" 
+         style="max-height: 150px; object-fit: cover;">
+  </div>
+  <h2 class="text-center mb-4">ACERCA DE AKIRACODE ACADEMY</h2>
+  <p class="text-center">
+    En <strong>AkiraCode Academy</strong> creemos que la programación no es solo una habilidad, 
+    sino un camino de disciplina y creatividad, al estilo de las grandes historias de anime.  
+    Nuestra academia combina la pasión por la <strong>informática</strong> con la energía del 
+    <strong>universo anime</strong>, formando desarrolladores que piensan como estrategas y crean como héroes.  
+  </p>
+</div>
+
+<!-- Misión, Visión, Objetivo -->
+<div class="container mt-5">
+  <div class="row text-center">
+    <div class="col-sm-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Misión</h5>
+          <p class="card-text">
+            Forjar a la próxima generación de <strong>guerreros del código</strong>, brindando 
+            conocimientos en programación, diseño y tecnología de manera didáctica, divertida 
+            y con un enfoque innovador inspirado en el anime.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Visión</h5>
+          <p class="card-text">
+            Ser reconocidos como una academia donde aprender a programar se convierta en una 
+            <strong>aventura épica</strong>. Un lugar en el que cada estudiante sea protagonista 
+            de su propia historia tecnológica, listo para conquistar el futuro digital.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Objetivo</h5>
+          <p class="card-text">
+            Ofrecer formación en <strong>JavaScript, Python, Bootstrap y más</strong>, integrando 
+            recursos modernos y prácticos, de forma que los alumnos no solo adquieran conocimientos, 
+            sino que vivan una experiencia única de aprendizaje con estilo anime.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Valores -->
+<div class="container mt-5">
+  <h2 class="text-center mb-4">NUESTROS VALORES</h2>
+  <div class="row text-center">
+    <div class="col-sm-3">
+      <div class="card shadow-sm">
+        <img src="{{ url_for('static', filename='innovacion.jpg') }}" class="card-img-top" alt="Innovación">
+        <div class="card-body">
+          <h5 class="card-title">Innovación</h5>
+          <p class="card-text">Como los héroes de anime, creemos en superar límites y crear nuevas soluciones.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card shadow-sm">
+        <img src="{{ url_for('static', filename='compromiso.jpg') }}" class="card-img-top" alt="Compromiso">
+        <div class="card-body">
+          <h5 class="card-title">Compromiso</h5>
+          <p class="card-text">Acompañamos a cada estudiante en su camino ninja hacia la maestría del código.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card shadow-sm">
+        <img src="{{ url_for('static', filename='accesibilidad.jpg') }}" class="card-img-top" alt="Accesibilidad">
+        <div class="card-body">
+          <h5 class="card-title">Accesibilidad</h5>
+          <p class="card-text">Un dojo digital donde todos son bienvenidos a entrenar sus habilidades.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card shadow-sm">
+        <img src="{{ url_for('static', filename='eficiencia.jpg') }}" class="card-img-top" alt="Eficiencia">
+        <div class="card-body">
+          <h5 class="card-title">Eficiencia</h5>
+          <p class="card-text">Aprender rápido, practicar fuerte y aplicar el conocimiento con confianza.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
