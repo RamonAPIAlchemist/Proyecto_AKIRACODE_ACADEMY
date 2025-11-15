@@ -9,7 +9,7 @@ import bcrypt
 import re
 
 # Inicializamos la aplicación Flask
-app = Flask(__name__, template_folder="Templates")
+app = Flask(__name__, template_folder="templates")
 app.secret_key = '09f78ead-8a13-11f0-9f04-089798bc6dda'
 
 # ----------------- CONEXIÓN A MYSQL -----------------
