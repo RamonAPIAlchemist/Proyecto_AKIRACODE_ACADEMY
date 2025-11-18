@@ -199,11 +199,26 @@ def usuario():
     else:
         return redirect(url_for('login'))
 
-# ----------------- RUTA DEL ADMIN -----------------
+# ----------------- RUTA DEL ADMIN CON CONTADORES -----------------
 @app.route('/admin')
 def admin():
     if 'usuario' in session and session.get('rol') == 1:
-        return render_template("admin.html", usuario=session['usuario'])
+        cur = mysql.connection.cursor()
+        
+        # Contar usuarios
+        cur.execute("SELECT COUNT(*) as total FROM usuario")
+        total_usuarios = cur.fetchone()['total']
+        
+        # Contar cursos (productos)
+        cur.execute("SELECT COUNT(*) as total FROM productos")
+        total_cursos = cur.fetchone()['total']
+        
+        cur.close()
+        
+        return render_template("admin.html", 
+                             usuario=session['usuario'],
+                             total_usuarios=total_usuarios,
+                             total_cursos=total_cursos)
     else:
         flash('Acceso denegado', 'error')
         return redirect(url_for('login'))

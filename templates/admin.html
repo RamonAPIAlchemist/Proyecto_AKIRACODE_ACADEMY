@@ -1,7 +1,7 @@
 {% extends 'baseadmin.html' %}
 {% block title %}Panel de Administración{% endblock %}
 {% block body %}
-<!--MENSAJE DE ALERTA SweetAlert2 CONFIRMACION-->
+<!--MENSAJE DE ALERTA SweetAlert2 CONFIRMACION (MANTENIDO IGUAL)-->
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <ul class=flashes>
@@ -12,7 +12,6 @@ toast: true,
 position: "top-end",
 showConfirmButton: false,
 timer: 2000,
-
 timerProgressBar: true,
 didOpen: (toast) => {
 toast.onmouseenter = Swal.stopTimer;
@@ -28,7 +27,7 @@ title: "{{message}}"
 </ul>
 {% endif %}
 {% endwith %}
-<!--MENSAJE DE ALERTA PARA ELIMINACION SweetAlert2-->
+<!--MENSAJE DE ALERTA PARA ELIMINACION SweetAlert2 (MANTENIDO IGUAL)-->
 <script>
 function confirmarEliminacion(url) {
 Swal.fire({
@@ -47,74 +46,641 @@ window.location.href = url;
 });
 }
 </script>
-<div class="container p-5 mt-3">
-<h2 class=" text-center alert alert-danger py-4">Sistema de Gestión de Cursos</h2>
-<div class="row">
-<div class="row text-center">
-<div class="col-sm-4 mb-3 mb-sm-0">
-<div class="card" style="background: linear-gradient(180deg, #355e3b, #7a9f7a, #f1eeda);">
-<div class="row g-0">
-<div class="col-md-8">
-<div class="card-body">
-<div class="card-body text-white">
 
-<h5 class="card-title">Perfil del Usuario</h5>
-<!-- p class="card-text">Mostrar registro de usuarios</p> -->
-<a href="{{ url_for('listar')}}" class="btn btn-outline-success">Ver
-Detalles</a>
-</div>
-</div>
-</div>
-<div class="col-md-4 align-content-center">
-<img src="{{ url_for('static', filename='user.png') }}" class="img-fluid rounded-start"
-alt="Agregar Usuario ...">
-</div>
-</div>
-</div>
-</div>
-<div class="col-sm-4 mb-3 mb-sm-0">
-<div class="card" style="background: linear-gradient(180deg, #042bf1,#367cd9,#ffffff);">
-<div class="row g-0">
-<div class="col-md-8">
-<div class="card-body">
-<div class="card-body text-white">
-<h5 class="card-title">Registrar Cursos</h5>
-<!-- <p class="card-text">Agregar los productos al sistema</p> -->
-<a href="{{ url_for('listar_productos_agregados') }}" class="btn btn-outline-success">Ver
-Detalles</a>
-</div>
-</div>
-</div>
-<div class="col-md-4 align-content-center">
-<a href="{{ url_for('listar_productos_agregados') }}">
-<img src="{{ url_for('static', filename='agregarp.png') }}"
-class="img-fluid rounded-start" alt="..."></a>
-</div>
-</div>
-</div>
-</div>
-<div class="col-sm-4 mb-3 mb-sm-0">
-<div class="card" style="background: linear-gradient(180deg, #0b235c,#3d85a9,#e0f7ff);">
-<div class="row g-0">
-<div class="col-md-8">
-<div class="card-body">
-<div class="card-body text-white">
-<h5 class="card-title">Visualizar Cursos</h5>
-<!-- <p class="card-text">Muestra lista de productos</p> -->
-<a href="{{ url_for('listar_productos') }}" class="btn btn-outline-success">Ver
-Detalles</a>
+<div class="admin-dashboard-container">
+    <!-- Header Principal -->
+    <div class="admin-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>🚀 Panel de Administración</h1>
+                <p>Sistema integral de gestión educativa</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-badge">
+                    <span class="stat-number">{{ total_usuarios }}</span>
+                    <span class="stat-label">Usuarios</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-number">{{ total_cursos }}</span>
+                    <span class="stat-label">Cursos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas -->
+    <div class="metrics-grid">
+        <div class="metric-card primary">
+            <div class="metric-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ total_usuarios }}</h3>
+                <p>Total de Usuarios</p>
+                <span class="metric-description">Usuarios registrados en el sistema</span>
+            </div>
+        </div>
+        
+        <div class="metric-card success">
+            <div class="metric-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ total_cursos }}</h3>
+                <p>Total de Cursos</p>
+                <span class="metric-description">Cursos disponibles en el sistema</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Navegación -->
+    <div class="navigation-grid">
+        <!-- Tarjeta 1: Perfil del Usuario -->
+        <div class="nav-card user-card">
+            <div class="nav-card-header">
+                <div class="nav-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="nav-title">
+                    <h3>Perfil del Usuario</h3>
+                    <p>Gestión de usuarios del sistema</p>
+                </div>
+            </div>
+            <div class="nav-card-body">
+                <div class="nav-image">
+                    <img src="{{ url_for('static', filename='user.png') }}" alt="Gestión de Usuarios">
+                </div>
+                <div class="nav-actions">
+                    <a href="{{ url_for('listar')}}" class="nav-btn">
+                        <i class="fas fa-eye"></i>
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2: Registrar Cursos -->
+        <div class="nav-card course-card">
+            <div class="nav-card-header">
+                <div class="nav-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="nav-title">
+                    <h3>Registrar Cursos</h3>
+                    <p>Agregar nuevos cursos al sistema</p>
+                </div>
+            </div>
+            <div class="nav-card-body">
+                <div class="nav-image">
+                    <img src="{{ url_for('static', filename='agregarp.png') }}" alt="Registrar Cursos">
+                </div>
+                <div class="nav-actions">
+                    <a href="{{ url_for('listar_productos_agregados') }}" class="nav-btn">
+                        <i class="fas fa-arrow-right"></i>
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3: Visualizar Cursos -->
+        <div class="nav-card view-card">
+            <div class="nav-card-header">
+                <div class="nav-icon">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <div class="nav-title">
+                    <h3>Visualizar Cursos</h3>
+                    <p>Explorar catálogo de cursos</p>
+                </div>
+            </div>
+            <div class="nav-card-body">
+                <div class="nav-image">
+                    <img src="{{ url_for('static', filename='listarp.png') }}" alt="Visualizar Cursos">
+                </div>
+                <div class="nav-actions">
+                    <a href="{{ url_for('listar_productos') }}" class="nav-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-</div>
-</div>
-<div class="col-md-4 align-content-center">
-<img src="{{ url_for('static', filename='listarp.png') }}"
-class="img-fluid rounded-start" alt="...">
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+<style>
+/* Variables en tema negro con bordes reforzados */
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --success: #10b981;
+    --success-dark: #059669;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --background: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface-light: #2d2d2d;
+    --text: #ffffff;
+    --text-light: #a0a0a0;
+    --text-lighter: #666666;
+    --border: #404040;
+    --border-light: #555555;
+    --border-strong: #666666;
+    --border-visible: #888888;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+    --shadow-xl: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--background);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* Contenedor principal */
+.admin-dashboard-container {
+    min-height: 100vh;
+    padding: 0;
+    background: var(--background);
+}
+
+/* Header con bordes visibles */
+.admin-header {
+    background: var(--surface);
+    border: 3px solid var(--border-visible);
+    border-radius: 12px;
+    margin: 1rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    box-shadow: var(--shadow-xl);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header-title h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.header-title p {
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-badge {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--border-visible);
+    min-width: 120px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Grid de métricas con bordes visibles */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.metric-card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--border-visible);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.metric-card.primary {
+    border-left: 6px solid var(--primary);
+}
+
+.metric-card.success {
+    border-left: 6px solid var(--success);
+}
+
+.metric-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    border: 2px solid var(--border-visible);
+}
+
+.metric-card.success .metric-icon {
+    background: linear-gradient(135deg, var(--success), var(--success-dark));
+}
+
+.metric-info h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.metric-info p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.metric-description {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Grid de navegación con bordes visibles */
+.navigation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.nav-card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--border-visible);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+}
+
+.nav-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.nav-card-header {
+    padding: 1.5rem;
+    border-bottom: 2px solid var(--border-visible);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface-light);
+}
+
+.nav-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    border: 2px solid var(--border-visible);
+}
+
+.user-card .nav-icon {
+    background: linear-gradient(135deg, #355e3b, #7a9f7a);
+}
+
+.course-card .nav-icon {
+    background: linear-gradient(135deg, #042bf1, #367cd9);
+}
+
+.view-card .nav-icon {
+    background: linear-gradient(135deg, #0b235c, #3d85a9);
+}
+
+.nav-title h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.nav-title p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.nav-card-body {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--surface);
+}
+
+.nav-image {
+    flex: 0 0 auto;
+}
+
+.nav-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: var(--surface-light);
+    padding: 0.5rem;
+    border: 2px solid var(--border-visible);
+}
+
+.nav-actions {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    background: linear-gradient(135deg, var(--success), var(--success-dark));
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid var(--border-visible);
+}
+
+.nav-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--success);
+}
+
+/* Efectos de contorno para mejor visibilidad */
+.admin-header, .metric-card, .nav-card {
+    position: relative;
+}
+
+/* Asegurar que los bordes sean siempre visibles */
+.admin-header::after, .metric-card::after, .nav-card::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 19px;
+    border: 1px solid var(--border-visible);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+    
+    .header-stats {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .navigation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        padding: 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .header-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .metrics-grid {
+        padding: 0.5rem;
+        grid-template-columns: 1fr;
+    }
+    
+    .navigation-grid {
+        padding: 0.5rem;
+    }
+    
+    .metric-card {
+        padding: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .nav-card-body {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .nav-actions {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .stat-badge {
+        padding: 0.75rem 1rem;
+        min-width: 100px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    
+    .header-title h1 {
+        font-size: 1.25rem;
+    }
+    
+    .header-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stat-badge {
+        width: 100%;
+    }
+    
+    .metric-info h3 {
+        font-size: 2rem;
+    }
+    
+    .nav-card-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .nav-image img {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Animaciones suaves sin afectar bordes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-header {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.metric-card {
+    animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.nav-card {
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.nav-card:nth-child(1) { animation-delay: 0.2s; }
+.nav-card:nth-child(2) { animation-delay: 0.3s; }
+.nav-card:nth-child(3) { animation-delay: 0.4s; }
+
+/* Efecto de hover que mantiene los bordes visibles */
+.metric-card:hover, .nav-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-light);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-visible);
+    border-radius: 4px;
+    border: 1px solid var(--surface-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Asegurar contraste en todos los elementos */
+.metric-card, .nav-card, .stat-badge {
+    background: var(--surface);
+    border: 3px solid var(--border-visible);
+}
+
+.nav-card-header {
+    border-bottom: 2px solid var(--border-visible);
+}
+
+.nav-image img {
+    border: 2px solid var(--border-visible);
+}
+
+.nav-btn {
+    border: 2px solid var(--border-visible);
+}
+
+.metric-icon {
+    border: 2px solid var(--border-visible);
+}
+
+/* Refuerzo de bordes para máxima visibilidad */
+.admin-header {
+    border-width: 3px;
+}
+
+.metric-card {
+    border-width: 3px;
+}
+
+.nav-card {
+    border-width: 3px;
+}
+
+.stat-badge {
+    border-width: 3px;
+}
+</style>
+
 {% endblock %}

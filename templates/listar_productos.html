@@ -2,175 +2,350 @@
 {% block title %}Lista de Productos{% endblock %}
 {% block body %}
 
-<div class="container-fluid p-4" style="background-color:#eefaf5; min-height:100vh;">
+<div class="container-fluid p-4" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); min-height:100vh;">
 
-    <!-- Letrero con sombra -->
-    <h2 class="text-center alert-productos mb-4">Lista de Cursos</h2>
-
-    <!-- Controles superiores -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <button class="btn btn-light border me-2 shadow-sm" id="btnCopiar">
-                <i class="fas fa-copy"></i> Copiar
-            </button>
-            <button class="btn btn-light border me-2 shadow-sm" id="btnExcel">
-                <i class="fas fa-file-excel"></i> Excel
-            </button>
-            <button class="btn btn-light border me-2 shadow-sm" id="btnPDF">
-                <i class="fas fa-file-pdf"></i> PDF
-            </button>
-            <button class="btn btn-light border shadow-sm" id="btnImprimir">
-                <i class="fas fa-print"></i> Imprimir
-            </button>
-        </div>
-        <div class="d-flex align-items-center">
-            <span class="me-2">Mostrar</span>
-            <select id="registrosSelect" class="form-select form-select-sm me-2 shadow-sm" style="width:80px;">
-                <option>5</option>
-                <option selected>10</option>
-                <option>25</option>
-                <option>50</option>
-                <option value="-1">Todos</option>
-            </select>
-            <span class="me-3">registros</span>
-            <label for="searchInput" class="me-2">Buscar:</label>
-            <input type="text" id="searchInput" class="form-control form-control-sm shadow-sm"
-                style="width:200px;" placeholder="Buscar...">
+    <!-- Header mejorado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                <div class="card-body text-center py-4">
+                    <h1 class="display-6 fw-bold text-dark mb-2">📚 Catálogo de Cursos</h1>
+                    <p class="text-muted mb-0">Gestiona y administra todos tus cursos en un solo lugar</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Tabla de productos con sombra -->
-    <div class="table-responsive shadow p-2 bg-white rounded">
-        <table class="table table-striped table-bordered table-hover" id="productosTable">
-            <thead class="table-dark text-center">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Descripción</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr id="row-{{ producto.id }}">
-                    <td class="text-center">{{ loop.index }}</td>
-                    <td>
-                        <input type="text" name="nombre" value="{{ producto.nombre }}" 
-                               class="form-control form-control-sm" data-id="{{ producto.id }}">
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" 
-                               class="form-control form-control-sm text-end" data-id="{{ producto.id }}">
-                    </td>
-                    <td>
-                        <input type="text" name="descripcion" value="{{ producto.descripcion }}" 
-                               class="form-control form-control-sm" data-id="{{ producto.id }}">
-                    </td>
-                    <td>
-                        <input type="date" name="fecha" value="{{ producto.fecha.strftime('%Y-%m-%d') if producto.fecha else '' }}" 
-                               class="form-control form-control-sm" data-id="{{ producto.id }}">
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-success btn-sm me-1 shadow-sm btn-guardar" 
-                                data-id="{{ producto.id }}">
-                            <i class="fas fa-save"></i> Guardar
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm shadow-sm btn-eliminar" 
-                                data-id="{{ producto.id }}">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Tarjetas de estadísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 py-3" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                <div class="card-body text-white text-center">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Total Cursos</div>
+                            <div class="h2 mb-0">{{ productos|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 py-3" style="background: linear-gradient(135deg, #868e96 0%, #6c757d 100%);">
+                <div class="card-body text-white text-center">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Cursos Activos</div>
+                            <div class="h2 mb-0">{{ productos|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 py-3" style="background: linear-gradient(135deg, #adb5bd 0%, #868e96 100%);">
+                <div class="card-body text-white text-center">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Precio Promedio</div>
+                            <div class="h2 mb-0">
+                                {% if productos %}
+                                    ${{ (productos|sum(attribute='precio') / productos|length)|round(2) }}
+                                {% else %}
+                                    $0.00
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 py-3" style="background: linear-gradient(135deg, #ced4da 0%, #adb5bd 100%);">
+                <div class="card-body text-dark text-center">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Última Actualización</div>
+                            <div class="h6 mb-0">Hoy</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-sync-alt fa-2x text-dark-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Paginación -->
-    <div class="d-flex justify-content-between align-items-center mt-2">
-        <div id="infoPagina">Mostrando 1 a 10 de {{ productos|length }} registros</div>
-        <nav>
-            <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
-        </nav>
+    <!-- Panel principal -->
+    <div class="card shadow-lg border-0" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+        <div class="card-body">
+
+            <!-- Controles superiores mejorados -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-dark btn-sm shadow-sm" id="btnCopiar" data-bs-toggle="tooltip" data-bs-placement="top" title="Copiar tabla al portapapeles">
+                        <i class="fas fa-copy me-2"></i>Copiar
+                    </button>
+                    <button class="btn btn-outline-dark btn-sm shadow-sm" id="btnExcel" data-bs-toggle="tooltip" data-bs-placement="top" title="Exportar a Excel">
+                        <i class="fas fa-file-excel me-2"></i>Excel
+                    </button>
+                    <button class="btn btn-outline-dark btn-sm shadow-sm" id="btnPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Generar PDF">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
+                    </button>
+                    <button class="btn btn-outline-dark btn-sm shadow-sm" id="btnImprimir" data-bs-toggle="tooltip" data-bs-placement="top" title="Imprimir tabla">
+                        <i class="fas fa-print me-2"></i>Imprimir
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Cantidad de registros por página">Mostrar</span>
+                        <select id="registrosSelect" class="form-select form-select-sm shadow-sm" style="width:90px;">
+                            <option>5</option>
+                            <option selected>10</option>
+                            <option>25</option>
+                            <option>50</option>
+                            <option value="-1">Todos</option>
+                        </select>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-search text-muted me-2"></i>
+                        <input type="text" id="searchInput" class="form-control form-control-sm shadow-sm"
+                            style="width:220px;" placeholder="Buscar cursos..." data-bs-toggle="tooltip" data-bs-placement="top" title="Buscar en todos los campos de la tabla">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla mejorada -->
+            <div class="table-responsive rounded-3">
+                <table class="table table-hover align-middle" id="productosTable">
+                    <thead class="table-dark" style="background: linear-gradient(135deg, #495057, #343a40);">
+                        <tr>
+                            <th class="text-center" style="width: 80px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Identificador único del curso">ID</th>
+                            <th data-bs-toggle="tooltip" data-bs-placement="top" title="Nombre del curso">Nombre del Curso</th>
+                            <th class="text-center" style="width: 120px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Precio del curso en dólares">Precio</th>
+                            <th data-bs-toggle="tooltip" data-bs-placement="top" title="Descripción breve del curso">Descripción</th>
+                            <th class="text-center" style="width: 140px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Fecha de creación o actualización">Fecha</th>
+                            <th class="text-center" style="width: 180px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Acciones disponibles para el curso">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                        <tr id="row-{{ producto.id }}" class="border-bottom">
+                            <td class="text-center fw-bold text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="ID del curso: {{ loop.index }}">{{ loop.index }}</td>
+                            <td>
+                                <input type="text" name="nombre" value="{{ producto.nombre }}" 
+                                       class="form-control form-control-sm border-0 bg-light" 
+                                       data-id="{{ producto.id }}" placeholder="Nombre del curso"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Editar nombre del curso">
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-0">$</span>
+                                    <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" 
+                                           class="form-control form-control-sm border-0 bg-light text-end" 
+                                           data-id="{{ producto.id }}"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Editar precio del curso">
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" name="descripcion" value="{{ producto.descripcion }}" 
+                                       class="form-control form-control-sm border-0 bg-light" 
+                                       data-id="{{ producto.id }}" placeholder="Descripción del curso"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Editar descripción del curso">
+                            </td>
+                            <td>
+                                <input type="date" name="fecha" value="{{ producto.fecha.strftime('%Y-%m-%d') if producto.fecha else '' }}" 
+                                       class="form-control form-control-sm border-0 bg-light" 
+                                       data-id="{{ producto.id }}"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar fecha">
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-dark shadow-sm btn-guardar" 
+                                            data-id="{{ producto.id }}" 
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Guardar cambios en este curso">
+                                        <i class="fas fa-save me-1"></i>Guardar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger shadow-sm btn-eliminar" 
+                                            data-id="{{ producto.id }}" 
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar este curso permanentemente">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación mejorada -->
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <div id="infoPagina" class="text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Información de registros mostrados">Mostrando 1 a 10 de {{ productos|length }} registros</div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+                </nav>
+            </div>
+
+        </div>
     </div>
 
 </div>
 
-<!-- Estilos -->
+<!-- Estilos mejorados -->
 <style>
     body {
-        background-color: #eefaf5;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .alert-productos {
-        background-color: #f8d7da;
-        color: #721c24;
-        font-weight: bold;
-        font-size: 1.4rem;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        padding: 15px;
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .table th,
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .table th {
+        border: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 1rem 0.75rem;
+    }
+
     .table td {
-        vertical-align: middle !important;
-    }
-
-    .btn-success {
-        background-color: #28a745;
         border: none;
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
     }
 
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f8f9fa;
     }
 
-    .btn-light i {
-        font-size: 1.1rem;
-    }
-
-    .shadow-sm {
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .shadow {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    }
-
-    .btn-light {
+    .table tbody tr:hover {
         background-color: #f8f9fa;
-        border-color: #dee2e6;
+        transform: scale(1.01);
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-group .btn {
+        border-radius: 6px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
         transition: all 0.3s ease;
     }
 
-    .btn-light:hover {
-        background-color: #e9ecef;
-        transform: translateY(-2px);
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+        border-color: #6c757d;
+    }
+
+    .form-control.border-0:focus {
+        box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+        background-color: #fff;
     }
 
     .page-item.active .page-link {
-        background-color: #28a745;
-        border-color: #28a745;
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border-color: #6c757d;
     }
 
     .page-link {
-        color: #28a745;
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #6c757d;
     }
 
     .page-link:hover {
-        color: #1e7e34;
+        background-color: #f8f9fa;
+        color: #495057;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+
+    .input-group-text {
+        border: none;
+        background-color: #f8f9fa;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card, .table {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
     }
 </style>
 
-<!-- Scripts -->
+<!-- Scripts (se mantienen iguales - solo se agrega inicialización de tooltips) -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips de Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Todos los scripts anteriores se mantienen exactamente iguales
         const searchInput = document.getElementById('searchInput');
         const registrosSelect = document.getElementById('registrosSelect');
         const tableBody = document.querySelector('#productosTable tbody');
